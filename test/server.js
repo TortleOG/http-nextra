@@ -6,6 +6,9 @@ const server = new APIServer(undefined, async (request, response) => {
 	}
 });
 
+// Uncomment if using a favicon
+// server.favicon(`PATH TO FAVICON`);
+
 server.listen('5000', (error) => {
 	if (error) console.error('Something happened: ', error);
 	else console.log('Server is up!');
