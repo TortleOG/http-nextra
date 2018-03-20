@@ -71,6 +71,10 @@ class APIServer extends Server {
 		return ret;
 	}
 
+	favicon(path) {
+		this.router.add('favicon.ico', 'GET', (request, response) => response.sendFile(path));
+	}
+
 }
 
 const DEFAULT_HEADERS = {
