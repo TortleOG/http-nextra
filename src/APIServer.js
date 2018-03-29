@@ -1,4 +1,7 @@
 const { Server, IncomingMessage, ServerResponse } = require('http');
+const { parse } = require('url');
+const { scan } = require('fs-nextra');
+
 const Router = require('./Router/Router');
 const ResponseNextra = require('./ResponseNextra');
 const builders = require('./headerBuilder');
@@ -73,6 +76,23 @@ class APIServer extends Server {
 
 	favicon(path) {
 		this.router.add('favicon.ico', 'GET', (request, response) => response.sendFile(path));
+	}
+
+	async static(route, dir) {
+		if (typeof route === 'string' && typeof dir === 'undefined') {
+			dir = route;
+			route = null;
+		}
+
+		const paths = await scan(dir, { filter: (stats, path) => path.lastIndexOf('/') < path.lastIndexOf('.') });
+
+		for (const path of paths.keys()) {
+			const pathname = parse(path).path.slice(dir.lastIndexOf('/') - 1).substr(dir.substr(dir.lastIndexOf('/')).length);
+
+			if (this.router.paths.includes(pathname)) continue;
+
+			this.router.add(pathname, 'GET', (request, response) => response.sendFile(path));
+		}
 	}
 
 }
