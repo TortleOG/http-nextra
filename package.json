@@ -10,5 +10,8 @@
   "license": "MIT",
   "devDependencies": {
     "eslint": "^4.16.0"
+  },
+  "dependencies": {
+    "fs-nextra": "^0.3.2"
   }
 }
