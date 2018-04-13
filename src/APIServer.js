@@ -18,8 +18,11 @@ class APIServer extends Server {
 	 * @param {Object} options Any object
 	 */
 	constructor(listener, options = {}) {
-		super((request, response) => {
+		super(async (request, response) => {
 			Object.defineProperty(response, 'request', { value: request });
+			for (const middleware of this.middlewares) {
+				await middleware(request, response).catch(err => { throw err; });
+			}
 			listener(request, response);
 		});
 
@@ -29,6 +32,8 @@ class APIServer extends Server {
 		 * @type {Router}
 		 */
 		this.router = new Router(this, '/');
+
+		this.middlewares = [];
 
 		/**
 		 * Options for this server
@@ -70,6 +75,12 @@ class APIServer extends Server {
 			ret[header] = built;
 		}
 		return ret;
+	}
+
+	use(middleware) {
+		if (typeof middleware !== 'function') throw new Error('Middleware must a function.');
+
+		this.middlewares.push(middleware);
 	}
 
 }
