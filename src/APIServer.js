@@ -20,9 +20,7 @@ class APIServer extends Server {
 	constructor(listener, options = {}) {
 		super(async (request, response) => {
 			Object.defineProperty(response, 'request', { value: request });
-			for (const middleware of this.middlewares) {
-				await middleware(request, response).catch(err => { throw err; });
-			}
+			await Promise.all(this.middlewares.map(middleware => middleware(request, response)));
 			listener(request, response);
 		});
 
