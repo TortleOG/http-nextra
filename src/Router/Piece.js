@@ -1,6 +1,6 @@
 class Piece {
 
-	constructor(router, name, method, condition, callback) {
+	constructor(router, name, method, middlewares, condition, callback) {
 		/**
 		 * The type of the piece
 		 * @since 0.0.1
@@ -30,6 +30,8 @@ class Piece {
 		 */
 		this.method = method;
 
+		this._middlewares = middlewares;
+
 		/**
 		 * The inhibitor condition
 		 * @since 0.0.1
@@ -54,11 +56,13 @@ class Piece {
 	 * @returns {boolean}
 	 */
 	async run(request, response, options) {
+		console.log(this._middlewares);
 		const shouldRun = this._condition ?
 			await this._condition(request, response, options) :
 			true;
 
 		if (shouldRun) {
+			await Promise.all(this._middlewares.map(middleware => middleware(request, response)));
 			this._callback(request, response, options);
 			return true;
 		} else if (this._onInhibit) {

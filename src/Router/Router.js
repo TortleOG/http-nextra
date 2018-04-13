@@ -50,16 +50,23 @@ class Router {
 	 * @param {Function} [callback] The callback to run on requests
 	 * @returns {this}
 	 */
-	add(name, method = 'GET', condition, callback) {
-		if (typeof callback === 'undefined' && typeof condition === 'function') {
+	add(name, method = 'GET', middlewares, condition, callback) {
+		if (typeof condition === 'undefined' && typeof callback === 'undefined' && typeof middlewares === 'function') {
+			callback = middlewares;
+			condition = null;
+			middlewares = null;
+		} else if (typeof callback === 'undefined' && typeof condition === 'function' && Array.isArray(middlewares)) {
 			callback = condition;
 			condition = null;
+		} else if (typeof callback === 'undefined' && typeof middlewares === 'function' && typeof condition === 'function') {
+			condition = middlewares;
+			callback = condition;
 		}
 		if (name[0] === '/') name = name.slice(1, name.length);
 		const route = name.split('/');
 		this.paths.push(route.length > 1 ?
-			new Router(this.server, route.shift()).add(route.join('/'), method, condition, callback) :
-			new Piece(this, route[0], method, condition, callback));
+			new Router(this.server, route.shift()).add(route.join('/'), method, middlewares, condition, callback) :
+			new Piece(this, route[0], method, middlewares, condition, callback));
 
 		return this;
 	}
@@ -111,8 +118,8 @@ class Router {
 // Add all the aliases for better usage
 for (const method of METHODS) {
 	Object.defineProperty(Router.prototype, method.toLowerCase(), {
-		value: function (name, condition, callback) { // eslint-disable-line func-names
-			return this.add(name, method, condition, callback);
+		value: function (name, middlewares, condition, callback) { // eslint-disable-line func-names
+			return this.add(name, method, middlewares, condition, callback);
 		}
 	});
 }
