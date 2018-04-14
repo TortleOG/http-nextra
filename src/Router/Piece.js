@@ -56,13 +56,12 @@ class Piece {
 	 * @returns {boolean}
 	 */
 	async run(request, response, options) {
-		console.log(this._middlewares);
 		const shouldRun = this._condition ?
 			await this._condition(request, response, options) :
 			true;
 
 		if (shouldRun) {
-			await Promise.all(this._middlewares.map(middleware => middleware(request, response)));
+			if (this._middlewares) await Promise.all(this._middlewares.map(ware => ware(request, response)));
 			this._callback(request, response, options);
 			return true;
 		} else if (this._onInhibit) {
