@@ -20,7 +20,7 @@ class APIServer extends Server {
 	constructor(listener, options = {}) {
 		super(async (request, response) => {
 			Object.defineProperty(response, 'request', { value: request });
-			await Promise.all(this.middlewares.map(middleware => middleware(request, response)));
+			await Promise.all(this.middlewares.map(ware => ware(request, response)));
 			listener(request, response);
 		});
 
@@ -75,10 +75,10 @@ class APIServer extends Server {
 		return ret;
 	}
 
-	use(middleware) {
-		if (typeof middleware !== 'function') throw new Error('Middleware must a function.');
+	use(...fns) {
+		this.middlewares.push(...fns);
 
-		this.middlewares.push(middleware);
+		return this;
 	}
 
 }
